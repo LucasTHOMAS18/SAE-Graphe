@@ -4,10 +4,13 @@ import networkx as nx
 
 
 def format_personne(personne: str) -> str:
-    if '(' not in personne:
-        return personne.strip('[]')
+    if '(' in personne:
+        personne = personne[:personne.index('(')]
     
-    return personne[:(personne.index('(') - 1)].strip('[]')
+    if '|' in personne:
+        personne = personne[:personne.index('|')]
+    
+    return personne.strip("[]").strip()
 
 
 def json_vers_nx(chemin: str) -> nx.Graph:
@@ -27,3 +30,5 @@ def json_vers_nx(chemin: str) -> nx.Graph:
                         G.add_edge(personne1, personne2)
                         
     return G
+
+json_vers_nx('src/data/data_1000.json')
