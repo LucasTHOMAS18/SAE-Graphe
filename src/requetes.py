@@ -30,5 +30,3 @@ def json_vers_nx(chemin: str) -> nx.Graph:
                         G.add_edge(personne1, personne2)
                         
     return G
-
-json_vers_nx('src/data/data_1000.json')
