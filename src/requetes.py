@@ -30,3 +30,6 @@ def json_vers_nx(chemin: str) -> nx.Graph:
                         G.add_edge(personne1, personne2)
                         
     return G
+
+def collaborateurs_communs(G: nx.Graph, u: str, v: str) -> set:
+    return set(G[u]) & set(G[v])
