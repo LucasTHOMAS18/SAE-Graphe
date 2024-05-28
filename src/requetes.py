@@ -30,3 +30,22 @@ def json_vers_nx(chemin: str) -> nx.Graph:
                         G.add_edge(personne1, personne2)
                         
     return G
+
+
+def collaborateurs_communs(G: nx.Graph, u: str, v: str) -> set:
+    return set(G[u]) & set(G[v])
+
+
+def collaborateurs_proches(G: nx.Graph, u: str, k: int) -> set:
+    collaborateurs = set(G.adj[u])
+    a_traiter = collaborateurs.copy()
+    
+    while k > 0:
+        k -= 1
+        
+        for sommet in a_traiter.copy():
+            voisins = set(G.adj[sommet])
+            collaborateurs |= voisins
+            a_traiter |= voisins - collaborateurs
+    
+    return collaborateurs - {u} 
