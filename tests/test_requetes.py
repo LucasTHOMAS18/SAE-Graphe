@@ -1,9 +1,10 @@
 from pathlib import Path
 
+from src.collaborateurs import collaborateurs_proches as collaborateurs_sujet
 from src.requetes import *
 
-graphe = json_vers_nx(Path(__file__).parent / "data/data_test.json")
-graphe_mini = json_vers_nx(Path(__file__).parent / "data/data_test_mini.json")
+graphe = json_vers_nx(Path(__file__).parent / "data/data_test.txt")
+graphe_mini = json_vers_nx(Path(__file__).parent / "data/data_test_mini.txt")
 
 
 def test_format_personne():
@@ -17,7 +18,7 @@ def test_format_personne():
 
 def test_json_vers_nx():
     DICO_TEST = {
-        "a1": {"a2": {}, "a3": {}, "d1": {}, "d2": {}, "d3": {}, "p1": {}, "p2": {}, "p3": {}, "a5": {}},
+        "a1": {"a2": {}, "a3": {}, "d1": {}, "d2": {}, "d3": {}, "p1": {}, "p2": {}, "p3": {}, "a5": {}, "a7": {}},
         "a2": {"a1": {}, "a3": {}, "d1": {}, "d2": {}, "d3": {}, "p1": {}, "p2": {}, "p3": {}, "a4": {}, "a6": {}, "d4": {}, "d6": {}, "p4": {}, "p6": {}},
         "a3": {"a1": {}, "a2": {}, "d1": {}, "d2": {}, "d3": {}, "p1": {}, "p2": {}, "p3": {}, "a5": {}},
         "d1": {"a1": {}, "a2": {}, "a3": {}, "d2": {}, "d3": {}, "p1": {}, "p2": {}, "p3": {}},
@@ -35,6 +36,7 @@ def test_json_vers_nx():
         "p4": {"a4": {}, "a5": {}, "a6": {}, "d4": {}, "d5": {}, "d6": {}, "p5": {}, "p6": {}, "a2": {}, "d2": {}, "p2": {}},
         "p5": {"a4": {}, "a5": {}, "a6": {}, "d4": {}, "d5": {}, "d6": {}, "p4": {}, "p6": {}},
         "p6": {"a4": {}, "a5": {}, "a6": {}, "d4": {}, "d5": {}, "d6": {}, "p4": {}, "p5": {}, "a2": {}, "p2": {}, "d2": {}},
+        "a7": {"a1": {}},
     }
         
     G = nx.Graph(DICO_TEST)
@@ -44,4 +46,41 @@ def test_json_vers_nx():
 def test_collaborateurs_proches():
     assert collaborateurs_proches(graphe, "a1", 0) == set(graphe.adj["a1"])
     assert collaborateurs_proches(graphe_mini, "tom", 1) == {"paire", "OwO", "UwU", "patrick"}
-    
+
+
+def test_collaborateurs_communs():
+    assert collaborateurs_communs(graphe, "a1", "d1") ==  {'a3', 'd3', 'p2', 'd2', 'p1', 'p3', 'a2'}
+    assert collaborateurs_communs(graphe, "p5", "d3") ==  set()
+    assert collaborateurs_communs(graphe, "a4", "a3") ==  {"a2", "a5", "d2", "p2"}
+    assert collaborateurs_communs(graphe, "a2", "p4") ==  {"p2", "a4", "a6", "d4", "d6", "p6", "d2"}
+
+
+def test_collaborateurs_proches():
+    assert collaborateurs_proches(graphe, "a1", 0) ==  collaborateurs_sujet(graphe, "a1", 0)
+    assert collaborateurs_proches(graphe, "a1", 1) ==  collaborateurs_sujet(graphe, "a1", 1)
+    assert collaborateurs_proches(graphe, "a1", 2) ==  collaborateurs_sujet(graphe, "a1", 2)
+    assert collaborateurs_proches(graphe, "a1", 3) ==  collaborateurs_sujet(graphe, "a1", 3)
+
+
+def test_est_proche():
+    assert est_proche(graphe, "a1", "a1", 0)
+    assert est_proche(graphe, "a1", "a2")
+    assert est_proche(graphe, "a1", "a2", 2)
+    assert est_proche(graphe, "a5", "a2", 2)
+    assert est_proche(graphe, "a5", "a1", 3)
+
+
+def test_distance_naive():
+    assert distance_naive(graphe, "a1", "a1") == 0
+    assert distance_naive(graphe, "a1", "a2") == 1
+    assert distance_naive(graphe, "a1", "a5") == 1
+    assert distance_naive(graphe, "a2", "a5") == 2
+    assert distance_naive(graphe, "a42", "a1") == -1
+
+
+def test_distance():
+    assert distance(graphe, "a1", "a1") == 0
+    assert distance(graphe, "a1", "a2") == 1
+    assert distance(graphe, "a1", "a5") == 1
+    assert distance(graphe, "a2", "a5") == 2
+    assert distance(graphe, "a42", "a1") == -1

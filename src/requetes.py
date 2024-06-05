@@ -37,15 +37,62 @@ def collaborateurs_communs(G: nx.Graph, u: str, v: str) -> set:
 
 
 def collaborateurs_proches(G: nx.Graph, u: str, k: int) -> set:
-    collaborateurs = set(G.adj[u])
-    a_traiter = collaborateurs.copy()
+    if u not in G.nodes:
+        return set()
     
-    while k > 0:
-        k -= 1
+    collaborateurs = {u}
+    a_traiter = {u}
+    
+    for _ in range(k):
+        seront_traites = set()
         
-        for sommet in a_traiter.copy():
+        for sommet in a_traiter:
             voisins = set(G.adj[sommet])
-            collaborateurs |= voisins
-            a_traiter |= voisins - collaborateurs
+            seront_traites |= voisins - collaborateurs
+            
+        collaborateurs |= seront_traites
+        a_traiter = seront_traites
     
-    return collaborateurs - {u} 
+    return collaborateurs
+
+
+
+def est_proche(G: nx.Graph, u: str, v: str, k: int = 1) -> bool:
+    return v in collaborateurs_proches(G, u, k)
+
+
+def distance_naive(G: nx.Graph, u: str, v: str) -> int:
+    if u == v:
+        return 0
+    
+    for k in range(1, nx.number_of_nodes(G)):
+        if est_proche(G, u, v, k):
+            return k
+    
+    return -1
+
+
+def distance(G: nx.Graph, u: str, v: str) -> int:
+    if u not in G.nodes or v not in G.nodes:
+        return -1
+    
+    if u == v:
+        return 0
+    
+    collaborateurs = {u}
+    a_traiter = {u}
+    
+    for d in range(nx.number_of_nodes(G)):
+        seront_traites = set()
+        
+        for sommet in a_traiter:
+            voisins = set(G.adj[sommet])
+            seront_traites |= voisins - collaborateurs
+            
+        collaborateurs |= seront_traites
+        a_traiter = seront_traites
+        
+        if v in collaborateurs:
+            return d + 1
+    
+    return -1
