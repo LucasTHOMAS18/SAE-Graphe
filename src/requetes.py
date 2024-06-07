@@ -72,27 +72,58 @@ def distance_naive(G: nx.Graph, u: str, v: str) -> int:
     return -1
 
 
-def distance(G: nx.Graph, u: str, v: str) -> int:
-    if u not in G.nodes or v not in G.nodes:
+def distance(G, u, v):
+    if u not in G or v not in G:
         return -1
     
     if u == v:
         return 0
     
-    collaborateurs = {u}
-    a_traiter = {u}
+    a_parcourir = [u]
+    distances = {u: 0}
     
-    for d in range(nx.number_of_nodes(G)):
-        seront_traites = set()
+    while a_parcourir:
+        courrant = a_parcourir.pop(0)
         
-        for sommet in a_traiter:
-            voisins = set(G.adj[sommet])
-            seront_traites |= voisins - collaborateurs
+        for voisin in G[courrant]:
+            if voisin not in distances:
+                distances[voisin] = distances[courrant] + 1
+
+                if voisin == v:
+                    return distances[voisin]
+                
+                a_parcourir.append(voisin)
+
+
+def centralite(G, u):
+    max_centralite = float('-inf')
+    
+    for v in G.nodes:
+        c = distance(G, u, v)
+        if c > max_centralite:
+            max_centralite = c
             
-        collaborateurs |= seront_traites
-        a_traiter = seront_traites
-        
-        if v in collaborateurs:
-            return d + 1
+    return max_centralite
+
+
+def centre_hollywood(G):
+    min_centralite = float('inf')
+    centre = None
     
-    return -1
+    for u in G.nodes:
+        c = centralite(G, u)
+        if c < min_centralite:
+            min_centralite = c
+            centre = u
+            
+    return centre
+
+def eloignement_max(G):
+    max_centralite = float('-inf')
+    
+    for u in G.nodes:
+        c = centralite(G, u)
+        if c > max_centralite:
+            max_centralite = c
+            
+    return max_centralite
