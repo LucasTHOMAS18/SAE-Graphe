@@ -75,24 +75,30 @@ def distance_naive(G: nx.Graph, u: str, v: str) -> int:
 def distance(G, u, v):
     if u not in G or v not in G:
         return -1
-    
+
     if u == v:
         return 0
-    
-    a_parcourir = [u]
-    distances = {u: 0}
-    
-    while a_parcourir:
-        courrant = a_parcourir.pop(0)
-        
-        for voisin in G[courrant]:
-            if voisin not in distances:
-                distances[voisin] = distances[courrant] + 1
 
+    niveau = 0
+    niveau_actuel = {u}
+    niveau_suivant = set()
+
+    while niveau_actuel:
+        courant = niveau_actuel.pop()
+        
+        for voisin in G[courant]:
+            if voisin not in niveau_actuel:
                 if voisin == v:
-                    return distances[voisin]
+                    return niveau + 1
                 
-                a_parcourir.append(voisin)
+                niveau_suivant.add(voisin)
+                
+        if not niveau_actuel:
+            niveau += 1
+            niveau_actuel = niveau_suivant
+            niveau_suivant = set()
+            
+    return -1
 
 
 def centralite(G, u):
