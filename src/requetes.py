@@ -1,4 +1,6 @@
 import json
+from pathlib import Path
+from time import perf_counter
 
 import networkx as nx
 
@@ -72,7 +74,7 @@ def distance_naive(G: nx.Graph, u: str, v: str) -> int:
     return -1
 
 
-def distance(G, u, v):
+def distance(G: nx.Graph, u: str, v: str):
     if u not in G or v not in G:
         return -1
 
@@ -102,17 +104,25 @@ def distance(G, u, v):
 
 
 def centralite(G, u):
-    max_centralite = float('-inf')
+    a_parcourir = [u]
+    distances = {u: 0}
+    distance_max = 0
     
-    for v in G.nodes:
-        c = distance(G, u, v)
-        if c > max_centralite:
-            max_centralite = c
-            
-    return max_centralite
+    while a_parcourir:
+        courrant = a_parcourir.pop(0)
+        
+        for voisin in G[courrant]:
+            if voisin not in distances:
+                distances[voisin] = distances[courrant] + 1
+                a_parcourir.append(voisin)
+
+                if distances[voisin] > distance_max:
+                    distance_max = distances[voisin]
+
+    return distance_max
 
 
-def centre_hollywood(G):
+def centre_hollywood(G: nx.Graph):
     min_centralite = float('inf')
     centre = None
     
@@ -124,7 +134,8 @@ def centre_hollywood(G):
             
     return centre
 
-def eloignement_max(G):
+
+def eloignement_max(G: nx.Graph):
     max_centralite = float('-inf')
     
     for u in G.nodes:
@@ -133,3 +144,15 @@ def eloignement_max(G):
             max_centralite = c
             
     return max_centralite
+
+
+# Tests des temps d'exécution
+def chrono(fonction, *args, **kwargs):
+    t0 = perf_counter()
+    res = fonction(*args, **kwargs)
+    print(f"Temps d'exécution de {fonction.__name__}: {perf_counter() - t0}")
+    return res
+    
+
+if __name__ == "__main__":
+    graphe = chrono(json_vers_nx, Path(__file__).parent / "data/data.txt")
